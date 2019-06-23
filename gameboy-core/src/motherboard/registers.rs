@@ -1,4 +1,8 @@
-#[allow(non_snake_case)]
+#![allow(non_snake_case)]
+use super::memory::Memory;
+use std::ops::Index;
+use std::ops::IndexMut;
+use std::sync::Arc;
 
 pub struct Registers {
     /// general purpose registers
@@ -17,10 +21,12 @@ pub struct Registers {
     /// special purpose registers
     sp: u16, // stack pointer
     pc: u16, // program pointer
+
+    mem: Arc<Memory>,
 }
 
 impl Registers {
-    pub fn new() -> Self {
+    pub fn new(mem: Arc<Memory>) -> Self {
         Registers {
             A: 0,
             F: 0,
@@ -32,6 +38,8 @@ impl Registers {
             L: 0,
             sp: 0,
             pc: 0x100,
+
+            mem,
         }
     }
 
@@ -53,5 +61,57 @@ impl Registers {
     /// C: Math operation raised carry
     pub fn carry(&self) -> bool {
         ((self.F >> 4) & 1) == 1
+    }
+
+    pub fn HL(&self) -> u16 {
+        ((self.H as u16) << 8) | (self.L as u16)
+    }
+}
+
+impl Index<usize> for Registers {
+    type Output = u8;
+    fn index(&self, i: usize) -> &Self::Output {
+        match i {
+            0x7 | 0xF => &self.A,
+            0x0 | 0x8 => &self.B,
+            0x1 | 0x9 => &self.C,
+            0x2 | 0xA => &self.D,
+            0x3 | 0xB => &self.E,
+            0x4 | 0xC => &self.H,
+            0x5 | 0xD => &self.L,
+            0x6 | 0xE => &self.mem[self.HL() as usize],
+            _ => unimplemented!(),
+        }
+    }
+}
+
+impl IndexMut<usize> for Registers {
+    fn index_mut<'a>(&'a mut self, i: usize) -> &'a mut Self::Output {
+        match i {
+            0x7 | 0xF => &mut self.A,
+            0x0 | 0x8 => &mut self.B,
+            0x1 | 0x9 => &mut self.C,
+            0x2 | 0xA => &mut self.D,
+            0x3 | 0xB => &mut self.E,
+            0x4 | 0xC => &mut self.H,
+            0x5 | 0xD => &mut self.L,
+            0x6 | 0xE => &mut self.L, //TODO:  self.mem[self.HL() as usize],
+            _ => unimplemented!(),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn init() -> Registers {
+        Registers::new(Arc::new(Memory::new()))
+    }
+
+    #[test]
+    fn test_init() {
+        let r = init();
+        assert_eq!(r.pc, 0x100);
     }
 }
