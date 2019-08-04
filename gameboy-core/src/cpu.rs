@@ -2,16 +2,27 @@ use super::memory::Memory;
 use super::registers::Registers;
 use std::sync::Arc;
 
+struct Clock {
+    m: u64,
+    t: u64,
+}
+
+impl Clock {
+    fn new() -> Self {
+        Clock { m: 0, t: 0 }
+    }
+}
+
 pub struct Cpu {
     reg: Registers,
-    mem: Arc<Memory>,
+    clk: Clock,
 }
 
 impl Cpu {
-    pub fn new(mem: Arc<Memory>) -> Self {
+    pub fn new() -> Self {
         Cpu {
-            reg: Registers::new(mem.clone()),
-            mem,
+            reg: Registers::new(),
+            clk: Clock::new(),
         }
     }
 

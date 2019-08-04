@@ -21,12 +21,10 @@ pub struct Registers {
     /// special purpose registers
     sp: u16, // stack pointer
     pc: u16, // program pointer
-
-    mem: Arc<Memory>,
 }
 
 impl Registers {
-    pub fn new(mem: Arc<Memory>) -> Self {
+    pub fn new() -> Self {
         Registers {
             A: 0,
             F: 0,
@@ -38,8 +36,6 @@ impl Registers {
             L: 0,
             sp: 0,
             pc: 0x100,
-
-            mem,
         }
     }
 
@@ -79,8 +75,7 @@ impl Index<usize> for Registers {
             0x3 | 0xB => &self.E,
             0x4 | 0xC => &self.H,
             0x5 | 0xD => &self.L,
-            0x6 | 0xE => &self.mem[self.HL() as usize],
-            _ => unimplemented!(),
+            index => panic!("Access to an unknow register {}", index),
         }
     }
 }
@@ -95,8 +90,7 @@ impl IndexMut<usize> for Registers {
             0x3 | 0xB => &mut self.E,
             0x4 | 0xC => &mut self.H,
             0x5 | 0xD => &mut self.L,
-            0x6 | 0xE => &mut self.L, //TODO:  self.mem[self.HL() as usize],
-            _ => unimplemented!(),
+            index => panic!("Access to an unknow register {}", index),
         }
     }
 }

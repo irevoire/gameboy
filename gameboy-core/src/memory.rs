@@ -66,7 +66,7 @@ impl Index<usize> for Memory {
             0xA000...0xBFFF => &self.switchable_ram[i - 0xA000],
             0xC000...0xDFFF => &self.internal_ram[i - 0xC000],
             0xE000...0xFDFF => &self.internal_ram[i - 0xE000],
-            _ => unimplemented!(),
+            addr => panic!("Trying to access a bad address: {}", addr),
         }
     }
 }
@@ -79,7 +79,7 @@ impl IndexMut<usize> for Memory {
             0xA000...0xBFFF => &mut self.switchable_ram[i - 0xA000],
             0xC000...0xDFFF => &mut self.internal_ram[i - 0xC000],
             0xE000...0xFDFF => &mut self.internal_ram[i - 0xE000],
-            _ => unimplemented!(),
+            addr => panic!("Trying to access a bad address: {}", addr),
         }
     }
 }
